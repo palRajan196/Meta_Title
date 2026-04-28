@@ -10,15 +10,33 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const handleFetch = async () => {
-    const urlList = urls.split("\n").filter((u) => u.trim());
+  const urlList = urls.split("\n").filter((u) => u.trim());
 
-    setLoading(true);
-    const res = await axios.post(`${apiUrl}/api/description`, {
-      urls: urlList,
-    });
-    setResults(res.data);
-    setLoading(false);
-  };
+  const chunkSize = 100; // send 100 URLs per request
+  let allResults = [];
+
+  setLoading(true);
+
+  try {
+    for (let i = 0; i < urlList.length; i += chunkSize) {
+      const chunk = urlList.slice(i, i + chunkSize);
+
+      const res = await axios.post(`${apiUrl}/api/description`, {
+        urls: chunk,
+      });
+
+      // merge results
+      allResults = [...allResults, ...res.data];
+
+      // 🔥 optional: update UI progressively
+      setResults([...allResults]);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  setLoading(false);
+};
 
   const handleDownload = async () => {
     const urlList = urls.split("\n").filter((u) => u.trim());
