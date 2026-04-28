@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
+const apiUrl = import.meta.env.VITE_API_URL;
+
 
 function App() {
   const [urls, setUrls] = useState("");
@@ -11,7 +13,7 @@ function App() {
     const urlList = urls.split("\n").filter((u) => u.trim());
 
     setLoading(true);
-    const res = await axios.post("http://localhost:5000/api/description", {
+    const res = await axios.post(`${apiUrl}/api/description`, {
       urls: urlList,
     });
     setResults(res.data);
@@ -21,8 +23,7 @@ function App() {
   const handleDownload = async () => {
     const urlList = urls.split("\n").filter((u) => u.trim());
 
-    const res = await axios.post(
-      "http://localhost:5000/api/download",
+    const res = await axios.post(`${apiUrl}/api/download`,
       { urls: urlList },
       { responseType: "blob" }
     );
@@ -39,8 +40,7 @@ function App() {
     formData.append("file", e.target.files[0]);
 
     setLoading(true);
-    const res = await axios.post(
-      "http://localhost:5000/api/upload",
+    const res = await axios.post(`${apiUrl}/api/upload`,
       formData
     );
     setResults(res.data);
