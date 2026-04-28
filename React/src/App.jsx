@@ -11,7 +11,7 @@ function App() {
     const urlList = urls.split("\n").filter((u) => u.trim());
 
     setLoading(true);
-    const res = await axios.post("http://localhost:5000/api/bulk", {
+    const res = await axios.post("http://localhost:5000/api/description", {
       urls: urlList,
     });
     setResults(res.data);
