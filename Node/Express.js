@@ -1,14 +1,20 @@
 const express = require("express");
 const axios = require("axios");
 const cheerio = require("cheerio");
-const cors = require("cors");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
 const app = express();
 app.use(express.json());
-app.use(cors());
+const cors = require("cors");
 
+app.use(
+  cors({
+    origin: ["https://meta-title-108.onrender.com"], // your Vite frontend
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 // 🔹 Extract Meta Description
 async function getMetaDescription(url) {
   try {
