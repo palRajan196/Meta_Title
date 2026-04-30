@@ -41,7 +41,7 @@ function App() {
   const handleDownload = async () => {
     const urlList = urls.split("\n").filter((u) => u.trim());
 
-    const res = await axios.post(`${apiUrl}/api/download`,
+    const res = await axios.post(`${apiUrl}/api/download-csv`,
       { urls: urlList },
       { responseType: "blob" }
     );
@@ -88,7 +88,9 @@ function App() {
           <tr>
             <th>URL</th>
             <th>Title</th>
-            <th>Method</th>
+            <th>Description</th>
+             <th>Status</th>
+             <th>Login</th>
           </tr>
         </thead>
         <tbody>
@@ -96,7 +98,10 @@ function App() {
             <tr key={i}>
               <td>{r.url}</td>
               <td>{r.title}</td>
-              <td>{r.method}</td>
+              <td>{r.description}</td>
+              <td>{r.status}</td>
+              <td>{r.Login}</td>
+
             </tr>
           ))}
         </tbody>
