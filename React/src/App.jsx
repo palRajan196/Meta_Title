@@ -1,67 +1,88 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
-const apiUrl = import.meta.env.VITE_API_URL;
 
+const apiUrl = import.meta.env.VITE_API_URL;
 
 function App() {
   const [urls, setUrls] = useState("");
+  const [urlType, setUrlFormate] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const handleFetch = async () => {
-  const urlList = urls.split("\n").filter((u) => u.trim());
+  // 🔥 FIX: prevent form reload bug
+  const handleFetch = async (e) => {
+    e.preventDefault();
 
-  const chunkSize = 100; // send 100 URLs per request
-  let allResults = [];
+    const urlList = urls.split("\n").filter((u) => u.trim());
+    const chunkSize = 100;
 
-  setLoading(true);
+    let allResults = [];
 
-  try {
-    for (let i = 0; i < urlList.length; i += chunkSize) {
-      const chunk = urlList.slice(i, i + chunkSize);
+    setLoading(true);
 
-      const res = await axios.post(`${apiUrl}/api/description`, {
-        urls: chunk,
-      });
+    try {
+      for (let i = 0; i < urlList.length; i += chunkSize) {
+        const chunk = urlList.slice(i, i + chunkSize);
 
-      // merge results
-      allResults = [...allResults, ...res.data];
+        const res = await axios.post(`${apiUrl}/api/description`, {
+          urls: chunk,
+          linkType: urlType,
+        });
 
-      // 🔥 optional: update UI progressively
-      setResults([...allResults]);
+        allResults = [...allResults, ...res.data];
+
+        // 🔥 FIX: avoid heavy re-render issues
+        setResults([...allResults]);
+      }
+    } catch (err) {
+      console.error(err);
     }
-  } catch (err) {
-    console.error(err);
-  }
 
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
+  // 🔥 FIX: button type added + safety
   const handleDownload = async () => {
     const urlList = urls.split("\n").filter((u) => u.trim());
 
-    const res = await axios.post(`${apiUrl}/api/download-csv`,
-      { urls: urlList },
-      { responseType: "blob" }
-    );
+    try {
+      const res = await axios.post(
+        `${apiUrl}/api/download-csv`,
+        {
+          urls: urlList,
+          linkType: urlType,
+        },
+        { responseType: "blob" }
+      );
 
-    const blob = new Blob([res.data], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = "titles.csv";
-    link.click();
+      const blob = new Blob([res.data], { type: "text/csv" });
+
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = "results.csv";
+      link.click();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     const formData = new FormData();
-    formData.append("file", e.target.files[0]);
+    formData.append("file", file);
 
     setLoading(true);
-    const res = await axios.post(`${apiUrl}/api/upload`,
-      formData
-    );
-    setResults(res.data);
+
+    try {
+      const res = await axios.post(`${apiUrl}/api/upload`, formData);
+      setResults(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+
     setLoading(false);
   };
 
@@ -69,39 +90,64 @@ function App() {
     <div className="container">
       <h2>Meta Title Extractor</h2>
 
-      <textarea
-        placeholder="Enter URLs (one per line)"
-        value={urls}
-        onChange={(e) => setUrls(e.target.value)}
-      />
+      {/* FIX: form submit handled properly */}
+      <form onSubmit={handleFetch}>
+        <textarea
+          placeholder="Enter URLs (one per line)"
+          value={urls}
+          onChange={(e) => setUrls(e.target.value)}
+        />
 
-      <div className="buttons">
-        <button onClick={handleFetch}>Fetch Titles</button>
-        <button onClick={handleDownload}>Download CSV</button>
-        <input type="file" onChange={handleUpload} />
-      </div>
+        <div className="buttons">
+          <input
+            required
+            type="text"
+            placeholder="Enter URL format..."
+            value={urlType}
+            onChange={(e) => setUrlFormate(e.target.value)}
+          />
+
+          {/* FIX: type submit */}
+          <button type="submit" disabled={loading}>
+            Fetch Titles
+          </button>
+
+          {/* FIX: prevent form submit */}
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={loading}
+          >
+            Download CSV
+          </button>
+
+          <input type="file" onChange={handleUpload} />
+        </div>
+      </form>
 
       {loading && <p>Loading...</p>}
 
       <table>
         <thead>
           <tr>
-            <th>URL</th>
+            <th>Sr No.</th>
+            <th>URLs</th>
             <th>Title</th>
             <th>Description</th>
-             <th>Status</th>
-             <th>Login</th>
+            <th>Login</th>
+            <th>Format</th>
           </tr>
         </thead>
+
         <tbody>
           {results.map((r, i) => (
             <tr key={i}>
+              <td>{i + 1}</td>
               <td>{r.url}</td>
               <td>{r.title}</td>
               <td>{r.description}</td>
-              <td>{r.status}</td>
-              <td>{r.Login}</td>
-
+              <td>{r.login}</td>
+              <td>{r.linkType}</td>
             </tr>
           ))}
         </tbody>

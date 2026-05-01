@@ -1,10 +1,12 @@
 const express = require("express");
-const { Parser } = require("json2csv");
 const axios = require("axios");
 const cheerio = require("cheerio");
-require("dotenv").config();
 const cors = require("cors");
+const { Parser } = require("json2csv");
+const he = require("he");
 const pLimit = require("p-limit").default;
+
+require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,96 +15,80 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: ["https://meta-title-108.onrender.com"],
- // origin: ["http://localhost:5173"],
+    origin: "*",
     methods: ["GET", "POST"],
   })
 );
 
-// 🔥 Limit concurrency (VERY IMPORTANT)
-const limit = pLimit(10); // only 10 requests at a time
+// ⚡ faster but safe concurrency
+const limit = pLimit(15);
 
-// 🔹 Extract Meta Description
-async function getMetaData(url) {
+// ================= RETRY WRAPPER (IMPORTANT) =================
+async function fetchWithRetry(url, retries = 2) {
   try {
-    const response = await axios.get(url, {
-      timeout: 8000,
+    return await axios.get(url, {
+      timeout: 6000,
       headers: {
         "User-Agent": "Mozilla/5.0",
         "Accept-Language": "en-US,en;q=0.9",
+        Connection: "keep-alive",
       },
       maxRedirects: 5,
       validateStatus: () => true,
     });
+  } catch (err) {
+    if (retries > 0) {
+      return fetchWithRetry(url, retries - 1);
+    }
+    throw err;
+  }
+}
 
-    const { data, status, request } = response;
+// ================= CORE FUNCTION =================
+async function getMetaData(url, linkType) {
+  let Formate = "";
 
-    // ✅ SAFE
+  if (linkType && linkType.length > 0) {
+    Formate = url.includes(linkType) ? "Correct" : "Wrong";
+  }
+
+  try {
+    const response = await fetchWithRetry(url);
+
+    const { data, status: statusCode, request } = response;
+
     const html = (data || "").toLowerCase();
     const finalUrl = request?.res?.responseUrl || url;
 
-    const $ = cheerio.load(data || "");
+    const $ = cheerio.load(typeof data === "string" ? data : "");
 
-    // ✅ TITLE SAFE
     let title =
       $('meta[property="og:title"]').attr("content") ||
-      $('title').text() ||
-      $('meta[name="twitter:title"]').attr("content") ||
+      $("title").text() ||
       "No Title";
 
-    // ✅ DESCRIPTION SAFE
     let description =
       $('meta[name="description"]').attr("content") ||
       $('meta[property="og:description"]').attr("content") ||
-      $('meta[name="twitter:description"]').attr("content");
+      $('meta[name="twitter:description"]').attr("content") ||
+      "No Description";
 
-    description = description
-      ? description.replace(/\s+/g, " ").trim()
-      : "No Description";
+    // cleanup
+    title = he.decode(title).replace(/\s+/g, " ").trim().slice(0, 60);
+    description = he.decode(description).replace(/\s+/g, " ").trim().slice(0, 80);
 
-    title = title.replace(/\s+/g, " ").trim();
+    // ================= SAFE STATUS =================
+    let Status = "Unknown";
+    let LoginType = "No Blocked";
 
-    let LoginType = "unknown";
-    let Status = "";
-
-    // 🔴 DEAD
-    if (
-      status === 404 ||
-      status === 410 ||
-      html.includes("page not found") ||
-      html.includes("content unavailable")
-    ) {
+    if (statusCode >= 400) {
       Status = "Dead";
-    }
-
-    // ⚠️ BLOCKED (SAFE CHECKS)
-    else if (
-      finalUrl.includes("login") ||
-      html.includes("login") ||
-      html.includes("sign in") ||
-      description?.includes("Join Instagram") // ✅ SAFE
-    ) {
-      if(description.includes("Create an account") || description.includes("log in to")){
-        LoginType = "blocked";
-        Status = "Login";
-      }
-      else{
-        LoginType = "No Blocked";
-      }
-      if(LoginType === "No Blocked" && description === "No Description"){
-        Status = "Dead";
-      }
-      
-     
-    //  console.log(html.includes("login"));
-    }
-
-    // 🟢 ACTIVE
-    else if (description !== "No Description") {
-      Status = "Active";
-    }
-
-    else if (status === 200 && html.length > 500) {
+    } else if (finalUrl.includes("login") || html.includes("sign in")) {
+      Status = "Login";
+      LoginType = "Blocked";
+    } else if (description === "No Description") {
+      Status = "Limited";
+    } else {
       Status = "Active";
     }
 
@@ -110,89 +96,86 @@ async function getMetaData(url) {
       url,
       title,
       description,
-      Login:LoginType,
+      login: LoginType,
       status: Status,
+      linkType: Formate,
     };
-
   } catch (err) {
-    console.error("URL ERROR:", url, err.message); // 🔥 IMPORTANT LOG
-
     return {
       url,
       title: "Error",
-      description: "Error fetching",
-      status: "error",
+      description: "Failed",
+      login: "Unknown",
+      status: "Error",
+      linkType: Formate,
     };
   }
 }
-// 🔥 Batch processor
-async function processInBatches(urls) {
-  const batchSize = 50; // process 50 URLs per batch
-  const results = [];
 
-  for (let i = 0; i < urls.length; i += batchSize) {
-    const batch = urls.slice(i, i + batchSize);
-
-    const batchResults = await Promise.all(
-      batch.map((url) => limit(() => getMetaData(url)))
-    );
-
-    results.push(...batchResults);
-  }
-
-  return results;
+// ================= FAST PROCESS (NO BATCH OVERHEAD) =================
+async function processUrls(urls, linkType = "") {
+  return Promise.all(
+    urls.map((url) =>
+      limit(() => getMetaData(url, linkType))
+    )
+  );
 }
 
-// 🔹 API Route
+// ================= MAIN API =================
 app.post("/api/description", async (req, res) => {
-  const { urls } = req.body;
-
-  if (!Array.isArray(urls)) {
-    return res.status(400).json({ error: "urls must be an array" });
-  }
-
-  if (urls.length > 2000) {
-    return res.status(400).json({ error: "Max 2000 URLs allowed" });
-  }
-
   try {
-    const results = await processInBatches(urls);
+    const { urls, linkType } = req.body;
+
+    if (!Array.isArray(urls)) {
+      return res.status(400).json({ error: "urls must be an array" });
+    }
+
+    if (urls.length > 2000) {
+      return res.status(400).json({ error: "Max 2000 URLs allowed" });
+    }
+
+    const results = await processUrls(urls, linkType);
+
     res.json(results);
-  } catch {
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Processing failed" });
   }
 });
 
-// Download API 
-
-
+// ================= CSV =================
 app.post("/api/download-csv", async (req, res) => {
   try {
-    const { urls } = req.body;
+    const { urls, linkType } = req.body;
 
-    const results = await processInBatches(urls);
+    const results = await processUrls(urls, linkType);
 
-    const fields = [
-      { label: "URL", value: "url" },
-      { label: "TITLE", value: "title" },
-      { label: "DESCRIPTION", value: "description" },
-      { label: "STATUS", value: "status" },
-    ];
+    const parser = new Parser({
+      fields: [
+        { label: "URL", value: "url" },
+        { label: "TITLE", value: "title" },
+        { label: "DESCRIPTION", value: "description" },
+        { label: "LOGIN", value: "login" },
+        { label: "STATUS", value: "status" },
+        { label: "FORMAT", value: "linkType" },
+      ],
+    });
 
-    const parser = new Parser({ fields });
     const csv = parser.parse(results);
 
     res.header("Content-Type", "text/csv");
     res.attachment("results.csv");
-
     res.send(csv);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "CSV error" });
   }
 });
 
-// 🔹 Start Server
+// ================= HEALTH =================
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
+
 app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
