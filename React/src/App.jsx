@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
+import { use } from "react";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -9,13 +10,14 @@ function App() {
   const [urlType, setUrlFormate] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [range, setRange] = useState("");
 
   // 🔥 FIX: prevent form reload bug
   const handleFetch = async (e) => {
     e.preventDefault();
 
     const urlList = urls.split("\n").filter((u) => u.trim());
-    const chunkSize = 100;
+    const chunkSize = 50;
 
     let allResults = [];
 
@@ -24,7 +26,8 @@ function App() {
     try {
       for (let i = 0; i < urlList.length; i += chunkSize) {
         const chunk = urlList.slice(i, i + chunkSize);
-
+        const lasturl = i + chunkSize > urlList.length ? urlList.length : i + chunkSize;
+        setRange(`${i+1} - ${lasturl}`);
         const res = await axios.post(`${apiUrl}/api/description`, {
           urls: chunk,
           linkType: urlType,
@@ -43,30 +46,61 @@ function App() {
   };
 
   // 🔥 FIX: button type added + safety
-  const handleDownload = async () => {
-    const urlList = urls.split("\n").filter((u) => u.trim());
+  const handleDownload = () => {
 
-    try {
-      const res = await axios.post(
-        `${apiUrl}/api/download-csv`,
-        {
-          urls: urlList,
-          linkType: urlType,
-        },
-        { responseType: "blob" }
-      );
+  if (results.length === 0) {
+    return;
+  }
 
-      const blob = new Blob([res.data], { type: "text/csv" });
+  const headers = [
+    "URL",
+    "STATUS",
+    "TITLE",
+    "DESCRIPTION",
+  ];
 
-      const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.download = "results.csv";
-      link.click();
-    } catch (err) {
-      console.error(err);
+  const csvRows = [];
+
+  // HEADER
+  csvRows.push(headers.join(","));
+
+  // DATA
+  results.forEach((r) => {
+
+    csvRows.push([
+      `"${r.url || ""}"`,
+      `"${r.status || ""}"`,
+      `"${(r.title || "").replace(/"/g, '""')}"`,
+      `"${(r.description || "").replace(/"/g, '""')}"`
+    ].join(","));
+
+  });
+
+  const csvContent =
+    csvRows.join("\n");
+
+  const blob = new Blob(
+    [csvContent],
+    {
+      type: "text/csv;charset=utf-8;",
     }
-  };
+  );
 
+  const link =
+    document.createElement("a");
+
+  link.href =
+    window.URL.createObjectURL(blob);
+
+  link.download =
+    "results.csv";
+
+  link.click();
+
+  window.URL.revokeObjectURL(
+    link.href
+  );
+};
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -126,6 +160,7 @@ function App() {
       </form>
 
       {loading && <p>Loading...</p>}
+      {loading && <p>{range}</p>}
 
       <table>
         <thead>
