@@ -34,7 +34,7 @@ const httpsAgent = new https.Agent({
 });
 
 // ================= CONCURRENCY =================
-const limit = pLimit(10);
+const limit = pLimit(15);
 
 // ================= RETRY WRAPPER =================
 async function fetchWithRetry(
