@@ -122,7 +122,7 @@ function App() {
 
   return (
     <div className="container">
-      <h2>Meta Title Extractor</h2>
+      <h2>Pinkesh Express</h2>
 
       {/* FIX: form submit handled properly */}
       <form onSubmit={handleFetch}>
