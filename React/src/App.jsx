@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
 import { use } from "react";
+import { Circles, Oval, Vortex } from 'react-loader-spinner'
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -11,6 +12,7 @@ function App() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState("");
+  const [length,setLength] = useState("");
 
   // 🔥 FIX: prevent form reload bug
   const handleFetch = async (e) => {
@@ -22,6 +24,7 @@ function App() {
     let allResults = [];
 
     setLoading(true);
+    setLength(urlList.length);
 
     try {
       for (let i = 0; i < urlList.length; i += chunkSize) {
@@ -120,9 +123,26 @@ function App() {
     setLoading(false);
   };
 
+  function Loader() {
+  return (
+    <Vortex
+      height={80}
+      width={80}
+      color="pink"
+      wrapperStyle={{}}
+      wrapperClass=""
+      visible={true}
+      ariaLabel='oval-loading'
+      secondaryColor="red"
+      strokeWidth={2}
+      strokeWidthSecondary={2}
+    />
+  )
+}
+
   return (
     <div className="container">
-      <h2>Pinkesh Express</h2>
+      <h2>Paaji Express</h2>
 
       {/* FIX: form submit handled properly */}
       <form onSubmit={handleFetch}>
@@ -159,8 +179,11 @@ function App() {
         </div>
       </form>
 
-      {loading && <p>Loading...</p>}
-      {loading && <p>{range}</p>}
+      {loading && <p id="loader">{Loader()}</p>}
+      <p>
+      {loading && <span>{range}</span>}
+      {loading && <span><b>{` / ${length}`}</b></span>}
+      </p>
 
       <table>
         <thead>
