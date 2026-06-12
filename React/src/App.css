@@ -1,5 +1,6 @@
 body{
-  background-color: rgb(21, 21, 71);
+  background-color: rgb(116, 116, 240);
+  color:white
 }
 
 .container {
@@ -8,7 +9,10 @@ body{
   text-align: center;
 }
 .container h2{
-  color: red;
+  margin: 30px ;
+  background: linear-gradient(90deg, red, blue);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 textarea {
@@ -17,10 +21,12 @@ textarea {
   border-radius: 5px;
   margin-bottom: 10px;
   padding: 10px;
-  background: #32476e;
+  color: black;
+  background: #7aa7f4;
 }
 input{
-  background: #32476e;
+  background: #7aa7f4;
+  color: black;
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
@@ -41,7 +47,7 @@ button {
   color: #ddd;
 }
 button:hover{
-  background-color: rgb(53, 53, 117);
+  background-color: rgb(44, 44, 109);
   border: none;
   color: aquamarine;
   transition: 0.2s;
