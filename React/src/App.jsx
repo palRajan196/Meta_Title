@@ -142,7 +142,7 @@ function App() {
 
   return (
     <div className="container">
-      <h2>Paaji Express</h2>
+      <h2>SPE Meta Extractor</h2>
 
       {/* FIX: form submit handled properly */}
       <form onSubmit={handleFetch}>
