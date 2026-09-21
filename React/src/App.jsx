@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
+import TextLoader from "./Loader";
 import { use } from "react";
-import { Circles, Oval, Vortex } from 'react-loader-spinner'
+import { Bottom } from "./Bottom";
+import { Circles, Oval, Vortex, RotatingLines } from "react-loader-spinner";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -12,7 +14,7 @@ function App() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState("");
-  const [length,setLength] = useState("");
+  const [length, setLength] = useState("");
 
   // 🔥 FIX: prevent form reload bug
   const handleFetch = async (e) => {
@@ -22,6 +24,7 @@ function App() {
     const chunkSize = 50;
 
     let allResults = [];
+    setResults([]);
 
     setLoading(true);
     setLength(urlList.length);
@@ -29,8 +32,9 @@ function App() {
     try {
       for (let i = 0; i < urlList.length; i += chunkSize) {
         const chunk = urlList.slice(i, i + chunkSize);
-        const lasturl = i + chunkSize > urlList.length ? urlList.length : i + chunkSize;
-        setRange(`${i+1} - ${lasturl}`);
+        const lasturl =
+          i + chunkSize > urlList.length ? urlList.length : i + chunkSize;
+        setRange(`${i + 1} - ${lasturl}`);
         const res = await axios.post(`${apiUrl}/api/description`, {
           urls: chunk,
           linkType: urlType,
@@ -50,60 +54,48 @@ function App() {
 
   // 🔥 FIX: button type added + safety
   const handleDownload = () => {
-
-  if (results.length === 0) {
-    return;
-  }
-
-  const headers = [
-    "URL",
-    "STATUS",
-    "TITLE",
-    "DESCRIPTION",
-  ];
-
-  const csvRows = [];
-
-  // HEADER
-  csvRows.push(headers.join(","));
-
-  // DATA
-  results.forEach((r) => {
-
-    csvRows.push([
-      `"${r.url || ""}"`,
-      `"${r.status || ""}"`,
-      `"${(r.title || "").replace(/"/g, '""')}"`,
-      `"${(r.description || "").replace(/"/g, '""')}"`
-    ].join(","));
-
-  });
-
-  const csvContent =
-    csvRows.join("\n");
-
-  const blob = new Blob(
-    [csvContent],
-    {
-      type: "text/csv;charset=utf-8;",
+    if (results.length === 0) {
+      return;
     }
-  );
 
-  const link =
-    document.createElement("a");
+    const headers = ["URL", "STATUS", "TITLE", "DESCRIPTION", "FORMAT"];
 
-  link.href =
-    window.URL.createObjectURL(blob);
+    const csvRows = [];
 
-  link.download =
-    "results.csv";
+    // HEADER
+    csvRows.push(headers.join(","));
 
-  link.click();
+    // DATA
+    results.forEach((r) => {
+      csvRows.push(
+        [
+          `"${r.url || ""}"`,
+          `"${r.status || ""}"`,
+          `"${(r.title || "").replace(/"/g, '""')}"`,
+          `"${(r.description || "").replace(/"/g, '""')}"`,
+          `"${r.linkType || ""}"`,
+        ].join(","),
+      );
+    });
 
-  window.URL.revokeObjectURL(
-    link.href
-  );
-};
+    const csvContent = csvRows.join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const link = document.createElement("a");
+
+    link.href = window.URL.createObjectURL(blob);
+
+    link.download = "results.csv";
+
+    link.click();
+
+    window.URL.revokeObjectURL(link.href);
+    // Clear the input area 
+    setResults([]);
+  };
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -124,25 +116,26 @@ function App() {
   };
 
   function Loader() {
-  return (
-    <Vortex
-      height={80}
-      width={80}
-      color="pink"
-      wrapperStyle={{}}
-      wrapperClass=""
-      visible={true}
-      ariaLabel='oval-loading'
-      secondaryColor="red"
-      strokeWidth={2}
-      strokeWidthSecondary={2}
-    />
-  )
-}
+    return (
+      <RotatingLines
+        visible={true}
+        height="50"
+        width="50"
+        color="#32476e"
+        strokeWidth="5"
+        animationDuration="0.9"
+        ariaLabel="rotating-lines-loading"
+        wrapperStyle={{}}
+        wrapperClass=""
+      />
+    );
+  }
 
   return (
+    <>
     <div className="container">
       <h2>SPE Meta Extractor</h2>
+      <h5 id="subtitle">Extract page titles, meta descriptions, and Open Graph tagsfrom any link in seconds</h5>
 
       {/* FIX: form submit handled properly */}
       <form onSubmit={handleFetch}>
@@ -167,11 +160,7 @@ function App() {
           </button>
 
           {/* FIX: prevent form submit */}
-          <button
-            type="button"
-            onClick={handleDownload}
-            disabled={loading}
-          >
+          <button type="button" onClick={handleDownload} disabled={loading}>
             Download CSV
           </button>
 
@@ -181,8 +170,12 @@ function App() {
 
       {loading && <p id="loader">{Loader()}</p>}
       <p>
-      {loading && <span>{range}</span>}
-      {loading && <span><b>{` / ${length}`}</b></span>}
+        {loading && <span>{range}</span>}
+        {loading && (
+          <span>
+            <b>{` / ${length}`}</b>
+          </span>
+        )}
       </p>
 
       <table>
@@ -210,7 +203,10 @@ function App() {
           ))}
         </tbody>
       </table>
+      
     </div>
+   <Bottom/>
+    </>
   );
 }
 
