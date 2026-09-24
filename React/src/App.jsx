@@ -95,6 +95,7 @@ function App() {
     window.URL.revokeObjectURL(link.href);
     // Clear the input area 
     setResults([]);
+    setUrls("");
   };
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -205,7 +206,8 @@ function App() {
       </table>
       
     </div>
-   <Bottom/>
+    <Bottom/>
+   
     </>
   );
 }

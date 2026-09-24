@@ -4,22 +4,27 @@ body{
   margin: 0;
   background-color:white;
   color:black;
+  min-height: 100vh;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
 }
 
 .container {
   width: 80%;
+  min-height: 80vh;
   margin: auto;
   text-align: center;
 }
 .container h2{
-  margin: 30px 0px 0px 0px;
-  background: linear-gradient(90deg, red, blue);
+  margin-top: 10px;
+  font-family: 'Courier New', Courier, monospace;
+  background: linear-gradient(90deg, red, #111827);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 #subtitle{
-  color:#32476e;
+  color: #111827;
   margin-bottom: 20px;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
 
 textarea {
@@ -31,9 +36,10 @@ textarea {
   color: black;
   background-color: white;
   transition: 0.5s;
+  box-shadow: 5px 5px 10px rgb(132, 130, 130);
 }
 textarea:hover{
-  border-color: rgb(21, 21, 67);
+  border-color: white;
   box-shadow:0 4px 15px rgb(28, 28, 82);
 }
 input{
@@ -61,11 +67,11 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #32476e;
+  background-color: #111827;
   color: #ddd;
 }
 button:hover{
-  background-color: rgb(44, 44, 109);
+  background-color: #1d2943;
   border: none;
   color: aquamarine;
   transition: 0.2s;
@@ -81,20 +87,22 @@ button:hover{
 table {
   width: 100%;
   margin-top: 20px;
-  margin-bottom: 100px;
+  margin-bottom: 30px;
   border-collapse: collapse;
 }
 
 th, td {
-  color: rgb(3, 3, 112);
+  color: #111827;
   border: 1px solid #ddd;
   padding: 8px;
 }
+#extraSpace{
+  flex:1 0 auto;
+}
 
 #bottom{
-  margin-top: 20px;
-  position: sticky;
   display: flex;
+  height: 20vh;
   justify-content: center;
   align-items: center;
   color: aliceblue;
@@ -117,5 +125,5 @@ th, td {
   margin-right: 20%;
 }
 #author{
-  font-weight: 700;
+  color: red;
 }

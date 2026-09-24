@@ -106,8 +106,8 @@ async function getMetaData(
   ) {
 
     Formate = url.includes(linkType)
-      ? "Correct"
-      : "Wrong";
+      ? "Match"
+      : "Not Match";
   }
 
   try {
