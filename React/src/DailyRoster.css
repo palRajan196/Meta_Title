@@ -1,0 +1,345 @@
+.roster-app {
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 24px;
+  background: #f4f7fb;
+  border-radius: 20px;
+  font-family: Arial, sans-serif;
+  color: #182235;
+  box-sizing: border-box;
+}
+
+.roster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+
+.roster-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.roster-logo {
+  background: #dce8ff;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 28px;
+}
+
+.roster-heading h1 {
+  font-size: 25px;
+  margin: 0;
+}
+
+.roster-heading p {
+  margin: 5px 0 0;
+  color: #718096;
+}
+
+.today-badge {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 8px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.roster-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: white;
+  padding: 18px;
+  border-radius: 16px;
+  margin-bottom: 25px;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-input-group label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: bold;
+}
+
+.date-input-group input {
+  padding: 11px 13px;
+  border: 1px solid #dbe2ec;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.date-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.roster-app button {
+  padding: 11px 15px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.roster-app button:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.nav-button {
+  background: #e9eef6;
+  color: #25344e;
+}
+
+.today-button {
+  background: #2563eb;
+  color: white;
+}
+
+.roster-date-title {
+  margin: 25px 0 18px;
+}
+
+.roster-date-title h2 {
+  margin: 0;
+  font-size: 23px;
+}
+
+.roster-date-title p {
+  color: #718096;
+  margin: 7px 0 0;
+}
+
+.roster-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 15px;
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 28px;
+}
+
+.stat-card span {
+  font-size: 13px;
+}
+
+.stat-icon {
+  font-size: 26px;
+}
+
+.stat-working {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.stat-off {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.stat-leave {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.employee-card {
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.employee-name {
+  font-size: 17px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.employee-shift {
+  padding: 14px 8px;
+  border-radius: 11px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+/* Shift colors */
+.shift-off {
+  background: #8ed04e;
+  color: #15220b;
+}
+
+.shift-leave {
+  background: #ffff00;
+  color: #222;
+}
+
+.shift-night {
+  background: #aaa6a6;
+  color: #111;
+}
+
+.shift-day1 {
+  background: #ffff00;
+  color: #111;
+}
+
+.shift-day2 {
+  background: #ffbf00;
+  color: #111;
+}
+
+.shift-day3 {
+  background: #4a77ca;
+  color: white;
+}
+
+.shift-default {
+  background: #e5e7eb;
+  color: #111;
+}
+
+.roster-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 22px;
+  padding: 15px;
+  background: white;
+  border-radius: 12px;
+}
+
+.roster-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.legend-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.no-roster {
+  background: white;
+  text-align: center;
+  padding: 45px 20px;
+  border-radius: 16px;
+}
+
+.no-roster-icon {
+  font-size: 40px;
+}
+
+.no-roster h3 {
+  margin: 12px 0;
+}
+
+.no-roster p {
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+  .roster-app {
+    margin: 10px;
+    padding: 15px;
+    border-radius: 15px;
+  }
+
+  .roster-heading h1 {
+    font-size: 19px;
+  }
+
+  .roster-controls {
+    align-items: stretch;
+  }
+
+  .date-input-group input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .date-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .date-buttons button {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  .roster-stats {
+    gap: 7px;
+  }
+
+  .stat-card {
+    padding: 10px;
+    gap: 6px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-card strong {
+    font-size: 23px;
+  }
+
+  .stat-card span {
+    font-size: 11px;
+  }
+
+  .roster-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+  }
+
+  .employee-card {
+    padding: 11px;
+  }
+
+  .employee-name {
+    font-size: 15px;
+  }
+
+  .employee-shift {
+    font-size: 16px;
+    padding: 12px 5px;
+  }
+}

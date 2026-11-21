@@ -10,14 +10,14 @@ body{
 
 .container {
   width: 80%;
-  min-height: 80vh;
+  min-height: 87vh;
   margin: auto;
   text-align: center;
 }
 .container h2{
   margin-top: 10px;
-  font-family: 'Courier New', Courier, monospace;
-  background: linear-gradient(90deg, red, #111827);
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  background: linear-gradient(90deg, green, yellow);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -68,6 +68,7 @@ button {
   border-radius: 5px;
   cursor: pointer;
   background-color: #111827;
+  font-weight: 600;
   color: #ddd;
 }
 button:hover{
@@ -85,7 +86,7 @@ button:hover{
 }
 
 table {
-  width: 100%;
+  width: 80vw;
   margin-top: 20px;
   margin-bottom: 30px;
   border-collapse: collapse;
@@ -102,7 +103,7 @@ th, td {
 
 #bottom{
   display: flex;
-  height: 20vh;
+  height: 17vh;
   justify-content: center;
   align-items: center;
   color: aliceblue;
@@ -126,4 +127,7 @@ th, td {
 }
 #author{
   color: red;
+  font-weight: 700;
 }
+
+

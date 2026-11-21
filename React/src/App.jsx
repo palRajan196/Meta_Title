@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
 import TextLoader from "./Loader";
+import DailyRoster from "./DailyRoaster";
 import { use } from "react";
 import { Bottom } from "./Bottom";
 import { Circles, Oval, Vortex, RotatingLines } from "react-loader-spinner";
@@ -9,6 +10,7 @@ import { Circles, Oval, Vortex, RotatingLines } from "react-loader-spinner";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 function App() {
+  const [showRoster, setShowRoster] = useState(false);
   const [urls, setUrls] = useState("");
   const [urlType, setUrlFormate] = useState("");
   const [results, setResults] = useState([]);
@@ -132,10 +134,22 @@ function App() {
     );
   }
 
+  function GetRoster(){
+      return(
+      <DailyRoster/>
+      )
+  }
+
   return (
     <>
     <div className="container">
       <h2>SPE Meta Extractor</h2>
+
+      <button onClick={() => setShowRoster(!showRoster)}>
+        {showRoster ? "Hide Roster" : "GetRoster"}
+      </button>
+
+      {showRoster && GetRoster()}
       <h5 id="subtitle">Extract page titles, meta descriptions, and Open Graph tagsfrom any link in seconds</h5>
 
       {/* FIX: form submit handled properly */}
